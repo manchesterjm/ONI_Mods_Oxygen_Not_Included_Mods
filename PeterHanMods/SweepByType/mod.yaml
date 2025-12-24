@@ -1,0 +1,3 @@
+title: "Sweep By Type"
+description: "Adds an optional material type filter to the Sweep tool."
+staticID: PeterHan.SweepByType

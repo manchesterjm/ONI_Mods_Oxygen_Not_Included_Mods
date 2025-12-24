@@ -1,0 +1,3 @@
+title: "Settings Change Tool"
+description: "Adds a tool to enable/disable disinfect, auto repair, compost, empty storage, or building operation in bulk."
+staticID: PeterHan.BulkSettingsChange

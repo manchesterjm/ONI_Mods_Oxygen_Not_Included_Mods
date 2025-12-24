@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>OniStatsPlusSo</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>net471</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="0Harmony" />
+    <Reference Include="UnityEngine.CoreModule" />
+    <Reference Include="System.Xml">
+      <HintPath>../../../../../usr/lib/dotnet/shared/Microsoft.NETCore.App/8.0.22/System.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass" />
+    <Reference Include="Unity.TextMeshPro" />
+    <Reference Include="UnityEngine.UI" />
+  </ItemGroup>
+</Project>

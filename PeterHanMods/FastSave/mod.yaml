@@ -1,0 +1,3 @@
+title: "Fast Save"
+description: "Trims data from save files to make saving and loading faster."
+staticID: PeterHan.FastSave

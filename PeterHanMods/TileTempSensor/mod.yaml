@@ -1,0 +1,3 @@
+title: "Thermo Sensor Tile"
+description: "A Thermo Sensor in tile form, allowing heat transfer to it even in Vacuum."
+staticID: PeterHan.TileTempSensor

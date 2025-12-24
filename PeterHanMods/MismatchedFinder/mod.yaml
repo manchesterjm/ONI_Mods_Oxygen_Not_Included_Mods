@@ -1,0 +1,3 @@
+title: "Mismatched Wire Finder"
+description: "Finds wires and pipes that do not match the rest of their network."
+staticID: PeterHan.MismatchedFinder

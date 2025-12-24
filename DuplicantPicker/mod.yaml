@@ -1,0 +1,3 @@
+title: "Duplicant Picker"
+description: "Cycle through all duplicants in alphabetical order instead of random. Use PageUp to go backwards."
+staticID: DuplicantPicker

@@ -1,0 +1,3 @@
+title: "Starmap Queue"
+description: "Automatically selects new destinations to be analyzed when the Telescope finishes discovering a starmap destination."
+staticID: PeterHan.StarmapQueue

@@ -1,0 +1,3 @@
+title: "Food Supply Tooltip"
+description: "Shows tooltips on plants and critters for how much food they can supply per cycle in their current states."
+staticID: PeterHan.FoodTooltip
