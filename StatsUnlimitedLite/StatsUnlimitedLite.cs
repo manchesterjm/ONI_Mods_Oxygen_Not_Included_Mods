@@ -57,11 +57,12 @@ namespace StatsUnlimitedLite
 
         private static float GetExperienceForNextLevel(int level)
         {
-            // Game's formula for experience per level
-            // Constants from game: MAX_GAINED_ATTRIBUTE_LEVEL=20, EXPERIENCE_LEVEL_POWER=1.5, TARGET_MAX_LEVEL_CYCLE=400
-            const float maxLevel = 20f;
-            const float expPower = 1.5f;
-            const float targetCycle = 400f;
+            // Game's formula for experience per level. Read the tuning constants LIVE from the
+            // game rather than hardcoding them, so the curve always matches vanilla even after
+            // Klei retunes it (build 737790 changed EXPERIENCE_LEVEL_POWER 1.5 -> 1.7).
+            float maxLevel = TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL;
+            float expPower = TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.EXPERIENCE_LEVEL_POWER;
+            float targetCycle = TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE;
 
             float currentExp = Mathf.Pow((float)level / maxLevel, expPower) * targetCycle * 600f;
             float nextExp = Mathf.Pow(((float)level + 1f) / maxLevel, expPower) * targetCycle * 600f;

@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd*.zip
+
+# Local backup dirs + reference zips (not for VCS) — added 2026-06-22
+lib_backup_*/
+local_backup_*/
+*_backup_pre*/
+PeterHanMods.zip
