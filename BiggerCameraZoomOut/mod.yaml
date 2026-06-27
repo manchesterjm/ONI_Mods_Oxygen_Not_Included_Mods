@@ -1,0 +1,3 @@
+title: Bigger Camera Zoom Out
+description: Lets the camera zoom out much further (max orthographic size 200). Local rebuild for build 737790. Fork of Cairath/ONI-Mods (orphaned Nov 2022).
+staticID: Cairath.BiggerCameraZoomOut
