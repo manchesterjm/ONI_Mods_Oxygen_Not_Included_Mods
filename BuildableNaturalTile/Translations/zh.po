@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Application: Oxygen Not Included"
+"POT Version: 2.0"
+
+#. BuildableNaturalTile.STRINGS.NAME
+msgctxt "BuildableNaturalTile.STRINGS.NAME"
+msgid "Natural Tile"
+msgstr "自然砖块"
+
+#. BuildableNaturalTile.STRINGS.DESCRIPTION
+msgctxt "BuildableNaturalTile.STRINGS.DESCRIPTION"
+msgid "Fill that hole you dug out back in with any solid element."
+msgstr "用任何固体材料把你挖出的那个洞填回去。"
+
+#. BuildableNaturalTile.STRINGS.EFFECT
+msgctxt "BuildableNaturalTile.STRINGS.EFFECT"
+msgid "Fills a block in the world with <link=\"ELEMENTSSOLID\">Solids</link> ."
+msgstr "用<link=\"ELEMENTSSOLID\">固体</link>填充地图上的一个砖块。"
