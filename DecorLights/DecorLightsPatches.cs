@@ -20,6 +20,14 @@ namespace DecorLights
 				AddBuildingToFurnitureMenu(SaltLampConfig.Id);
 				AddBuildingToFurnitureMenu(CeilingLampConfig.Id);
 				AddBuildingToFurnitureMenu(LuminiferousSphereConfig.Id);
+
+				// Community-art lamps (data-driven, see DecorLightCatalog).
+				string effect = STRINGS.BUILDINGS.PREFABS.CEILINGLIGHT.EFFECT;
+				foreach (var spec in DecorLightCatalog.All)
+				{
+					AddBuildingStrings(spec.Id, spec.Name, spec.Description, effect);
+					AddBuildingToFurnitureMenu(spec.Id);
+				}
 			}
 		}
 
@@ -33,6 +41,9 @@ namespace DecorLights
 				UnlockBuildingWithGlassFurnishings(SaltLampConfig.Id);
 				UnlockBuildingWithGlassFurnishings(CeilingLampConfig.Id);
 				UnlockBuildingWithGlassFurnishings(LuminiferousSphereConfig.Id);
+
+				foreach (var spec in DecorLightCatalog.All)
+					UnlockBuildingWithGlassFurnishings(spec.Id);
 			}
 		}
 	}

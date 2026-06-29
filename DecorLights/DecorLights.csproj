@@ -15,15 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="ModUtils.cs" />
-    <Compile Include="DecorLightsMod.cs" />
-    <Compile Include="DecorLightsPatches.cs" />
-    <Compile Include="CeilingLampConfig.cs" />
-    <Compile Include="CeilingLamp.cs" />
-    <Compile Include="LavaLampConfig.cs" />
-    <Compile Include="LavaLamp.cs" />
-    <Compile Include="SaltLampConfig.cs" />
-    <Compile Include="LuminiferousSphereConfig.cs" />
+    <!-- All mod source lives in this folder; the community-art lamps are tiny
+         DecorLightConfigBase subclasses, so glob rather than list each by hand. -->
+    <Compile Include="*.cs" />
   </ItemGroup>
 
   <ItemGroup>
