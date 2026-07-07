@@ -8,9 +8,12 @@ namespace InsulatedDoor
     // very low thermal conductivity blocks heat between rooms.
     //
     // 737790 port notes:
-    //   * Dropped the original Door.OnPrefabInit anim patch (set overrideAnims to
-    //     anim_use_remote_kanim) — the base game does this itself now and the field
-    //     changed type, same as Self-sealing Airlocks.
+    //   * The original Door.OnPrefabInit anim patch is back, reworked (see
+    //     Door_OnPrefabInit_Patch below). The 2026-06-27 rebuild dropped it because
+    //     the base game now sets overrideAnims itself — but the game does it from a
+    //     static array that goes null when a mod's Harmony patch on Door runs the
+    //     class constructor before the anim database loads, crashing any dupe sent
+    //     to operate a door (seen live 2026-07-07).
     //   * Replaced the hardcoded tech IDs and hand-edited BUILDINGS.PLANORDER.data
     //     with runtime lookups off the matching vanilla door (see ModUtils).
     //   * Dropped the .po localization machinery; English strings registered inline.
@@ -52,6 +55,34 @@ namespace InsulatedDoor
                 ModUtils.UnlockUnderSameTechAs(TinyInsulatedManualPressureDoorConfig.Id, "ManualPressureDoor");
                 ModUtils.UnlockUnderSameTechAs(InsulatedPressureDoorConfig.Id, "PressureDoor");
                 ModUtils.UnlockUnderSameTechAs(TinyInsulatedPressureDoorConfig.Id, "PressureDoor");
+            }
+        }
+
+        // Door.OnPrefabInit copies the static Door.OVERRIDE_ANIMS array — the dupe's
+        // anim_use_remote "operate this door" animation — onto every door. That static
+        // is initialized the first time the Door class is touched, and Harmony's
+        // documented behaviour is that patching a method runs its class constructor;
+        // a mod patching Door at load time (our Self-sealing Airlocks fork does) fires
+        // it before the anim database exists, so Assets.GetAnim returns null and every
+        // door carries a null override. StandardWorker.AttachOverrideAnims null-checks
+        // the array but not its elements → NullReferenceException in
+        // KAnimControllerBase.AddAnimOverrides the moment a dupe starts operating a
+        // door (crash seen live 2026-07-07, dupe Pei vs InsulatedPressureDoor).
+        // Repair at prefab-init time, when the anim database is loaded. This runs for
+        // vanilla doors too — they share the same poisoned static array.
+        [HarmonyPatch(typeof(Door), "OnPrefabInit")]
+        public static class Door_OnPrefabInit_Patch
+        {
+            public static void Postfix(Door __instance)
+            {
+                KAnimFile[] anims = __instance.overrideAnims;
+                if (anims == null || !System.Array.Exists(anims, anim => anim == null))
+                {
+                    return;
+                }
+                KAnimFile useRemoteAnim = Assets.GetAnim("anim_use_remote_kanim");
+                __instance.overrideAnims =
+                    useRemoteAnim != null ? new[] { useRemoteAnim } : null;
             }
         }
 
