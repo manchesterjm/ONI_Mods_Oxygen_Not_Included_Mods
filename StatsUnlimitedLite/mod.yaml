@@ -1,3 +1,3 @@
 title: "Stats Unlimited Lite"
-description: "Raises duplicant stats cap from 20 to 50. Simplified version without PLib dependency."
+description: "Configurable duplicant stat cap (default 200, vanilla 20) and learning speed. Set the attribute XP and skill XP multipliers from the Options button in the Mods screen (1 = vanilla, 2 = twice as fast). Restart to apply."
 staticID: "StatsUnlimitedLite"

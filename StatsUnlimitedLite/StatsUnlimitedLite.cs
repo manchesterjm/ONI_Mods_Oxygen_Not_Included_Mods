@@ -6,12 +6,16 @@ namespace StatsUnlimitedLite
 {
     public class StatsUnlimitedLiteMod : UserMod2
     {
-        public const int STATS_CAP = 200;  // Game default: 20
+        public static Settings Settings { get; private set; } = new Settings();
 
         public override void OnLoad(Harmony harmony)
         {
             base.OnLoad(harmony);
-            Debug.Log($"StatsUnlimitedLite loaded! Stats cap raised from 20 to {STATS_CAP}");
+            PeterHan.PLib.Core.PUtil.InitLibrary(false);
+            new PeterHan.PLib.Options.POptions().RegisterOptions(this, typeof(Settings));
+            Settings = Settings.Load();
+            Debug.Log($"StatsUnlimitedLite loaded! Stats cap {Settings.MaxStatLevel} (vanilla 20); " +
+                $"attribute XP x{Settings.AttributeXpMultiplier}, skill XP x{Settings.SkillXpMultiplier}");
         }
     }
 
@@ -27,15 +31,15 @@ namespace StatsUnlimitedLite
             Klei.AI.AttributeLevels levels,
             float experience)
         {
-            // Check if already at our custom cap
-            if (__instance.level >= StatsUnlimitedLiteMod.STATS_CAP)
+            // Check if already at the configured cap
+            if (__instance.level >= StatsUnlimitedLiteMod.Settings.MaxStatLevel)
             {
                 __result = false;
                 return false;  // Skip original
             }
 
-            // Add experience
-            __instance.experience += experience;
+            // Add experience, scaled by the configured learning speed
+            __instance.experience += experience * StatsUnlimitedLiteMod.Settings.AttributeXpMultiplier;
             __instance.experience = Mathf.Max(0f, __instance.experience);
 
             // Calculate experience needed for next level using game's formula
@@ -68,6 +72,19 @@ namespace StatsUnlimitedLite
             float nextExp = Mathf.Pow(((float)level + 1f) / maxLevel, expPower) * targetCycle * 600f;
 
             return nextExp - currentExp;
+        }
+    }
+
+    /// <summary>
+    /// Learning-speed knob for skill points (hats): scale the experience amount
+    /// before the game's own bookkeeping runs.
+    /// </summary>
+    [HarmonyPatch(typeof(MinionResume), nameof(MinionResume.AddExperience))]
+    public static class MinionResume_AddExperience_Patch
+    {
+        public static void Prefix(ref float amount)
+        {
+            amount *= StatsUnlimitedLiteMod.Settings.SkillXpMultiplier;
         }
     }
 }

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>SkillStatsProgressRevived</AssemblyName>
+    <RootNamespace>SkillStatsProgressRevived</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblySearchPaths>$(AssemblySearchPaths);$(LibDir)</AssemblySearchPaths>
+  </PropertyGroup>
+  <PropertyGroup><LibDir>/mnt/win-d/Documents/ONI_Mods_Fork/lib</LibDir></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Mod.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="FloatingText.cs" />
+    <Compile Include="WorkPopups.cs" />
+    <Compile Include="PanelXp.cs" />
+    <Compile Include="XpDeltas.cs" />
+    <Compile Include="MoveStats.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>$(LibDir)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(LibDir)/Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp-firstpass"><HintPath>$(LibDir)/Assembly-CSharp-firstpass.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="PLib"><HintPath>$(LibDir)/PLib.dll</HintPath><Private>true</Private></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>$(LibDir)/Newtonsoft.Json.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(LibDir)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(LibDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(LibDir)/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(LibDir)/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>
