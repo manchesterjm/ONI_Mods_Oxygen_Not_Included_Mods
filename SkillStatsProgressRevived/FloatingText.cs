@@ -18,6 +18,12 @@ namespace SkillStatsProgressRevived
         // by vanilla popups are untouched.
         private static readonly Dictionary<PopFX, Color> PendingStyle = new Dictionary<PopFX, Color>();
 
+        // Our reports currently on screen; PopFX.Update wipes its reveal mask
+        // open over the first 10% of the lifetime (a 1 s "typing" effect at
+        // our 10 s lifetime), so these get the mask forced fully open every
+        // frame until the pop recycles.
+        private static readonly HashSet<PopFX> LiveReports = new HashSet<PopFX>();
+
         public static void Show(string text, GameObject duplicant, Color color)
         {
             if (!CanShowOver(duplicant) || PopFXManager.Instance == null)
@@ -30,16 +36,70 @@ namespace SkillStatsProgressRevived
             string oneLine = text.TrimEnd('\n').Replace(":\n", ": ").Replace("\n", "  |  ");
             // The 9-arg overload gives us the spawn offset directly plus
             // selfAdjustPositionIfInGroup, so simultaneous reports stack
-            // instead of drawing over each other.
+            // instead of drawing over each other. track_target keeps the
+            // report riding along with the duplicant instead of hanging in
+            // the air where it spawned.
             PopFX pop = PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, null, oneLine,
                 duplicant.transform, new Vector3(1f, 3.5f),
-                SkillStatsProgressRevivedMod.Options.PopupSeconds);
+                SkillStatsProgressRevivedMod.Options.PopupSeconds,
+                selfAdjustPositionIfInGroup: true, track_target: true);
             if (pop == null)
             {
                 return;
             }
             Style(pop, color);
             PendingStyle[pop] = color;
+            LiveReports.Add(pop);
+        }
+
+        [HarmonyPatch(typeof(PopFX), "Update")]
+        internal static class RevealInstantlyAndSteadyDrift
+        {
+            private static readonly System.Reflection.FieldInfo OffsetField =
+                AccessTools.Field(typeof(PopFX), "offset");
+
+            private static readonly System.Reflection.FieldInfo LifeElapsedField =
+                AccessTools.Field(typeof(PopFX), "lifeElapsed");
+
+            private static readonly Vector3 SpawnOffset = new Vector3(1f, 3.5f, 0f);
+
+            // Vanilla drifts a pop up by 2*t^2 tiles - fine for its 1.5 s
+            // lifetime, but at our 10 s it accelerates off screen. The offset
+            // field is re-added to that drift every frame, so pre-biasing it
+            // by (wanted - vanilla) nets out to a steady, configurable climb.
+            public static void Prefix(PopFX __instance)
+            {
+                if (!LiveReports.Contains(__instance))
+                {
+                    return;
+                }
+                // Update() is about to advance lifeElapsed by unscaledDeltaTime
+                // and position with the NEW value - bias against that same
+                // value or the quadratic cancels one frame stale, which shows
+                // as frame-time-dependent jitter.
+                float t = (float)LifeElapsedField.GetValue(__instance) + Time.unscaledDeltaTime;
+                float wantedClimb = SkillStatsProgressRevivedMod.Options.PopupDriftSpeed * t;
+                float vanillaClimb = 2f * t * t;
+                OffsetField.SetValue(__instance, SpawnOffset + Vector3.up * (wantedClimb - vanillaClimb));
+            }
+
+            public static void Postfix(PopFX __instance)
+            {
+                if (LiveReports.Contains(__instance) && __instance.mask != null)
+                {
+                    __instance.mask.fillAmount = 1f;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(PopFX), nameof(PopFX.Recycle))]
+        internal static class ForgetRecycledReports
+        {
+            public static void Postfix(PopFX __instance)
+            {
+                LiveReports.Remove(__instance);
+                PendingStyle.Remove(__instance);
+            }
         }
 
         // Size BOTH rects - the pop's root box AND the text component's own

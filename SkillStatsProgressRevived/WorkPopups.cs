@@ -121,26 +121,69 @@ namespace SkillStatsProgressRevived
             {
                 return;
             }
-            string text = __result + ":\n" + FloatingText.Shrink(session.WorkableTypeName, 12)
-                + "\nTime:" + (GameClock.Instance.GetTime() - session.StartTime).ToString("F2") + "s\n";
-            if (session.AttributeId != null)
+            Options options = SkillStatsProgressRevivedMod.Options;
+            AttributeLevel level = (session.AttributeId != null)
+                ? __instance.GetComponent<AttributeLevels>()?.GetAttributeLevel(session.AttributeId)
+                : null;
+            if (options.ShowTaskFinishPopup)
             {
-                AttributeLevel level = __instance.GetComponent<AttributeLevels>()?.GetAttributeLevel(session.AttributeId);
-                if (level != null)
+                FloatingText.Show(FullReport(__instance, __result, session, level),
+                    __instance.gameObject, ReportColor);
+            }
+            else if (options.ShowXpGainPopups && level != null
+                && level.experience > session.StartExperience)
+            {
+                float gainedPct = (level.experience - session.StartExperience)
+                    / level.GetExperienceForNextLevel() * 100f;
+                FloatingText.Show(
+                    $"{Db.Get().Attributes.Get(session.AttributeId).Name} +{gainedPct:F3}%",
+                    __instance.gameObject, ReportColor);
+            }
+            // A level-up mid-session leaves experience below the start value;
+            // the stat level-up popup already announced it.
+        }
+
+        private static string FullReport(StandardWorker worker, WorkerBase.WorkResult result,
+            WorkSession session, AttributeLevel level)
+        {
+            bool labelResult = result != WorkerBase.WorkResult.Success
+                || SkillStatsProgressRevivedMod.Options.ShowSuccessLabel;
+            string text = (labelResult ? (result + ":\n") : "")
+                + FloatingText.Shrink(session.WorkableTypeName, 12)
+                + "\nTime:" + (GameClock.Instance.GetTime() - session.StartTime).ToString("F2") + "s\n";
+            if (level != null)
+            {
+                text += FloatingText.Shrink(Db.Get().Attributes.Get(session.AttributeId).ProfessionName, 3) + ":";
+                if (level.experience >= session.StartExperience)
                 {
-                    text += FloatingText.Shrink(Db.Get().Attributes.Get(session.AttributeId).ProfessionName, 3) + ":";
-                    if (level.experience >= session.StartExperience)
-                    {
-                        float gained = level.experience - session.StartExperience;
-                        text += (gained / level.GetExperienceForNextLevel() * 100f).ToString("F3") + "%";
-                    }
-                    else
-                    {
-                        text += "Lvl UP"; // XP reset to 0 by the level-up
-                    }
+                    float gained = level.experience - session.StartExperience;
+                    text += (gained / level.GetExperienceForNextLevel() * 100f).ToString("F3") + "%";
+                }
+                else
+                {
+                    text += "Lvl UP"; // XP reset to 0 by the level-up
                 }
             }
-            FloatingText.Show(text, __instance.gameObject, ReportColor);
+            return text;
+        }
+    }
+
+    // The popup Josh actually wants most: a stat reaching a new level. Hooks
+    // the game's own level-up path, so it fires no matter what caused the XP
+    // (work, StatsUnlimitedLite multipliers, anything).
+    [HarmonyPatch(typeof(AttributeLevel), nameof(AttributeLevel.LevelUp))]
+    internal static class StatLevelUpReport
+    {
+        private static readonly Color ReportColor = Color.yellow;
+
+        public static void Postfix(AttributeLevel __instance, AttributeLevels levels)
+        {
+            if (!SkillStatsProgressRevivedMod.Options.ShowStatLevelPopups)
+            {
+                return;
+            }
+            FloatingText.Show($"{__instance.attribute.Name} {__instance.level}",
+                levels.gameObject, ReportColor);
         }
     }
 }

@@ -24,11 +24,29 @@ namespace SkillStatsProgressRevived
         [JsonProperty]
         public bool OnlySelectedDuplicant { get; set; } = true;
 
-        [Option("Show the work-start popup",
-            "Also report when work starts (task, efficiency, attribute level).\nTurn off to only see the finish report with the XP gained.",
+        [Option("Show XP gain popups",
+            "A short report of the XP a duplicant just earned toward the work\nattribute, as percent of the next level.",
             "Work popups")]
         [JsonProperty]
-        public bool ShowStartPopup { get; set; } = true;
+        public bool ShowXpGainPopups { get; set; } = true;
+
+        [Option("Show stat level-up popups",
+            "A report whenever a duplicant's stat reaches a new level.",
+            "Work popups")]
+        [JsonProperty]
+        public bool ShowStatLevelPopups { get; set; } = true;
+
+        [Option("Show task start reports",
+            "The detailed report when work starts (task, efficiency, attribute level).",
+            "Work popups")]
+        [JsonProperty]
+        public bool ShowStartPopup { get; set; } = false;
+
+        [Option("Show task finish reports",
+            "The detailed report when work ends (task, time worked, XP gained).\nWhen on, it replaces the short XP gain popup.",
+            "Work popups")]
+        [JsonProperty]
+        public bool ShowTaskFinishPopup { get; set; } = false;
 
         [Option("Popup font size", "Text size of the floating reports.", "Work popups")]
         [Limit(10, 60)]
@@ -39,6 +57,19 @@ namespace SkillStatsProgressRevived
         [Limit(2, 30)]
         [JsonProperty]
         public float PopupSeconds { get; set; } = 10f;
+
+        [Option("Popup float-away speed",
+            "Tiles per second the report drifts upward.\n0 = stays pinned to the duplicant. The game's own popups accelerate\nquadratically, which flies off screen at long durations.",
+            "Work popups")]
+        [Limit(0, 5)]
+        [JsonProperty]
+        public float PopupDriftSpeed { get; set; } = 0.5f;
+
+        [Option("Label successful tasks with Success",
+            "Prefix finish reports with the work result even when it succeeded.\nFailures always say Failed regardless of this setting.",
+            "Work popups")]
+        [JsonProperty]
+        public bool ShowSuccessLabel { get; set; } = false;
 
         [Option("Restyle the game's own popups",
             "Bigger font and solid icons on vanilla popups (level-ups etc.),\nlike the old mod did.",
