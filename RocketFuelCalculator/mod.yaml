@@ -1,0 +1,3 @@
+title: Rocket Fuel Calculator
+description: Picking a destination on the star map sets every fuel and oxidizer tank slider to the minimum load that reaches it - base-game rockets burn everything loaded, so extra fuel is pure waste. Pops the computed load and range over the command module. Original mod recreating the removed Workshop Rocket Calculator.
+staticID: RocketFuelCalculator
