@@ -1,0 +1,3 @@
+title: Buildable Geysers
+description: Adds buildable geyser kits for every geyser type in the loaded game (including other mods' geysers, discovered live). Dupes construct a kit from refined metal and plastic; on completion it becomes a real geyser that rolls its outputs like a natural one. No sandbox flag needed - saves stay achievement-eligible.
+staticID: BuildableGeysers
