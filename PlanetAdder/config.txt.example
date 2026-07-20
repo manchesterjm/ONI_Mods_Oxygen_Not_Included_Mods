@@ -1,0 +1,16 @@
+# Planet Adder config — copy this file to config.txt, edit, then load your save.
+# One planet per line: TypeName,row,slot
+#   TypeName — one of: Satellite, MetallicAsteroid, RockyAsteroid, CarbonaceousAsteroid,
+#              IcyDwarf, OrganicDwarf, DustyDwarf, TerraPlanet, VolcanoPlanet, GasGiant,
+#              IceGiant, SaltDwarf, RustPlanet, ForestPlanet, RedDwarf, GoldAsteroid,
+#              HydrogenGiant, OilyAsteroid, ShinyPlanet, ChlorinePlanet, SaltDesertPlanet,
+#              Wormhole, Earth
+#   row      — starmap distance row, 0-based (rockets need range (row+1) x 10,000 km;
+#              vanilla rows run 0-16)
+#   slot     — orbit position within the row, 0-9
+# Lines starting with # are ignored. After the planets are added, this file is renamed
+# config.txt.old so they are only ever added once per config.
+#
+# Example: a Gold Asteroid at 130,000 km and a Terra Planet at 90,000 km:
+# GoldAsteroid,12,3
+# TerraPlanet,8,6

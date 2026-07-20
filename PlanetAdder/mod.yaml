@@ -1,0 +1,3 @@
+title: Planet Adder (Local)
+description: Manually add chosen planets to the base-game starmap. Edit config.txt next to the DLL (one "TypeName,row,slot" per line — see config.txt.example), load the save, and the planets are added once (config is then renamed .old). Local rebuild of Schalasoft's Planet-Adder (GitHub) for the current game build. Personal use.
+staticID: PlanetAdder
