@@ -1,0 +1,3 @@
+title: Temperature Filters (Liquid + Gas)
+description: Adds a Liquid Temperature Filter and a Gas Temperature Filter — vanilla-filter clones that sort by TEMPERATURE instead of element. Contents at or above the per-building threshold (slider side screen with a type-in box, -200 to 2500 C, default 75 C) leave through the filtered port; cooler contents continue through the normal output. Unlocked by the same techs as the vanilla filters, placed beside them in the build menu. Original mod.
+staticID: TemperatureFilters
