@@ -1,0 +1,3 @@
+title: Aquatuner Cooling Factor
+description: Adds a per-building "Cooling Factor" slider (with a type-in number box) to every Thermo Aquatuner, setting how many degrees it removes from its liquid per pass (0-100, vanilla 14). Saved per aquatuner; heat output scales accordingly. Original mod.
+staticID: AquatunerCoolingFactor
