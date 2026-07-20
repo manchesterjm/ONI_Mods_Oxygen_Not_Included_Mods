@@ -1,0 +1,3 @@
+title: Planet Balancer (Revived)
+description: Guarantees every base-game planet type appears on the starmap. Missing types are added once at a random position between 80,000 and 170,000 km and saved with the world; works retroactively on existing saves. Clean-room reimplementation of Blackstiff's dead Workshop mod 1995546475 for the current game build; base-game starmap only (no effect under Spaced Out).
+staticID: PlanetBalancer

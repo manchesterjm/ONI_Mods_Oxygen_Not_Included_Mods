@@ -1,0 +1,3 @@
+title: Infinite Planet Resources (Local)
+description: Starmap destinations never deplete — every planet's available mass is topped back to full each sim tick, so cargo rockets always return fully loaded. Local rebuild of Schalasoft's Infinite-Planet-Resources (GitHub) for the current game build; base-game starmap only. Personal use.
+staticID: InfinitePlanetResources
