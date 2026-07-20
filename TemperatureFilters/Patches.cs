@@ -8,24 +8,28 @@ using UnityEngine;
 namespace TemperatureFilters
 {
     // Liquid/Gas Temperature Filter: a vanilla-Filter clone that routes by packet TEMPERATURE
-    // instead of element. Packets at or above the threshold leave through the filtered (orange)
-    // port; cooler packets continue out the normal output. Threshold is a per-building slider
-    // side screen with a type-in box (same ISingleSliderControl pattern as Aquatuner Cooling
-    // Factor). Flow handling mirrors the decompiled vanilla ElementFilter at 740622 minus the
-    // solid-conveyor branch and the Filterable element picker.
+    // instead of element. The side screen is the thermo sensor's threshold panel (IThresholdSwitch:
+    // Above/Below buttons + typed input + nonlinear slider, native °C/°F/K) — in Above mode packets
+    // warmer than the threshold leave through the filtered port, in Below mode cooler ones do;
+    // everything else continues out the normal output. Flow handling mirrors the decompiled
+    // vanilla ElementFilter at 740622 minus the solid-conveyor branch and the element picker.
     [SerializationConfig(MemberSerialization.OptIn)]
-    public class TemperatureFilter : KMonoBehaviour, ISecondaryOutput, ISingleSliderControl
+    public class TemperatureFilter : KMonoBehaviour, ISecondaryOutput, IThresholdSwitch
     {
-        public const float DEFAULT_THRESHOLD_C = 75f;
-        public const float MIN_C = -200f;
-        public const float MAX_C = 2500f;
-        private const float KELVIN_OFFSET = 273.15f;
+        private const float DEFAULT_THRESHOLD_K = 348.15f; // 75 °C
+        private const float RANGE_MIN_K = 0f;
+        private const float RANGE_MAX_K = 9999f;
 
         [SerializeField]
         public ConduitPortInfo portInfo;
 
         [Serialize]
-        private float thresholdKelvin = DEFAULT_THRESHOLD_C + KELVIN_OFFSET;
+        private float thresholdKelvin = DEFAULT_THRESHOLD_K;
+
+        [Serialize]
+        private bool activateAboveThreshold = true;
+
+        private float lastSeenTempKelvin = DEFAULT_THRESHOLD_K;
 
 #pragma warning disable CS0649 // populated by KMonoBehaviour's MyCmp attribute wiring
         [MyCmpReq]
@@ -64,7 +68,10 @@ namespace TemperatureFilters
                     resolveStringCallback = delegate (string _, object data)
                     {
                         TemperatureFilter filter = (TemperatureFilter)data;
-                        return string.Format(Strings.Get("STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM"),
+                        string key = filter.activateAboveThreshold
+                            ? "STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM_ABOVE"
+                            : "STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM_BELOW";
+                        return string.Format(Strings.Get(key),
                             GameUtil.GetFormattedTemperature(filter.thresholdKelvin));
                     },
                 };
@@ -118,7 +125,14 @@ namespace TemperatureFilters
             {
                 ConduitFlow flowManager = Conduit.GetFlowManager(portInfo.conduitType);
                 ConduitFlow.ConduitContents contents = flowManager.GetContents(inputCell);
-                int destination = contents.temperature >= thresholdKelvin ? filteredCell : outputCell;
+                if (contents.mass > 0f)
+                {
+                    lastSeenTempKelvin = contents.temperature;
+                }
+                bool toFiltered = activateAboveThreshold
+                    ? contents.temperature > thresholdKelvin
+                    : contents.temperature < thresholdKelvin;
+                int destination = toFiltered ? filteredCell : outputCell;
                 if (contents.mass > 0f && flowManager.GetContents(destination).mass <= 0f)
                 {
                     moved = true;
@@ -177,44 +191,80 @@ namespace TemperatureFilters
             return portInfo.offset;
         }
 
-        public string SliderTitleKey => "STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TITLE";
-
-        public string SliderUnits => " °C";
-
-        public int SliderDecimalPlaces(int index)
+        public float Threshold
         {
-            return 1;
+            get => thresholdKelvin;
+            set => thresholdKelvin = Mathf.Clamp(value, RANGE_MIN_K, RANGE_MAX_K);
         }
 
-        public float GetSliderMin(int index)
+        public bool ActivateAboveThreshold
         {
-            return MIN_C;
+            get => activateAboveThreshold;
+            set => activateAboveThreshold = value;
         }
 
-        public float GetSliderMax(int index)
+        public float CurrentValue => lastSeenTempKelvin;
+
+        public float RangeMin => RANGE_MIN_K;
+
+        public float RangeMax => RANGE_MAX_K;
+
+        public LocString Title => UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.TITLE;
+
+        public LocString ThresholdValueName => UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.TEMPERATURE;
+
+        public string AboveToolTip =>
+            Strings.Get("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP_ABOVE");
+
+        public string BelowToolTip =>
+            Strings.Get("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP_BELOW");
+
+        public ThresholdScreenLayoutType LayoutType => ThresholdScreenLayoutType.SliderBar;
+
+        public int IncrementScale => 1;
+
+        public NonLinearSlider.Range[] GetRanges => new NonLinearSlider.Range[4]
         {
-            return MAX_C;
+            new NonLinearSlider.Range(25f, 260f),
+            new NonLinearSlider.Range(50f, 400f),
+            new NonLinearSlider.Range(12f, 1500f),
+            new NonLinearSlider.Range(13f, 10000f),
+        };
+
+        public float GetRangeMinInputField()
+        {
+            return GameUtil.GetConvertedTemperature(RangeMin);
         }
 
-        public float GetSliderValue(int index)
+        public float GetRangeMaxInputField()
         {
-            return thresholdKelvin - KELVIN_OFFSET;
+            return GameUtil.GetConvertedTemperature(RangeMax);
         }
 
-        public void SetSliderValue(float value, int index)
+        public LocString ThresholdValueUnits()
         {
-            thresholdKelvin = Mathf.Clamp(value, MIN_C, MAX_C) + KELVIN_OFFSET;
+            return GameUtil.temperatureUnit switch
+            {
+                GameUtil.TemperatureUnit.Celsius => UI.UNITSUFFIXES.TEMPERATURE.CELSIUS,
+                GameUtil.TemperatureUnit.Fahrenheit => UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT,
+                _ => UI.UNITSUFFIXES.TEMPERATURE.KELVIN,
+            };
         }
 
-        public string GetSliderTooltipKey(int index)
+        public string Format(float value, bool units)
         {
-            return "STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP";
+            return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None,
+                GameUtil.TemperatureInterpretation.Absolute, units, roundInDestinationFormat: true);
         }
 
-        public string GetSliderTooltip(int index)
+        public float ProcessedSliderValue(float input)
         {
-            return string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP"),
-                GameUtil.GetFormattedTemperature(thresholdKelvin));
+            return Mathf.Round(input);
+        }
+
+        public float ProcessedInputValue(float input)
+        {
+            return GameUtil.GetTemperatureConvertedToKelvin(input);
         }
     }
 
@@ -351,12 +401,14 @@ namespace TemperatureFilters
                 "Sorts Gas by temperature instead of type.",
                 "Gas at or above the temperature threshold is redirected to the filtered output; "
                 + "cooler gas continues through the normal output.");
-            Strings.Add("STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM",
-                "Filtered output: at or above {0}");
-            Strings.Add("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TITLE", "Temperature Threshold");
-            Strings.Add("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP",
-                "Contents at or above {0} leave through the filtered output; cooler contents "
-                + "continue through the normal output.");
+            Strings.Add("STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM_ABOVE",
+                "Filtered output: above {0}");
+            Strings.Add("STRINGS.BUILDINGS.PREFABS.TEMPERATUREFILTER.STATUS_ITEM_BELOW",
+                "Filtered output: below {0}");
+            Strings.Add("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP_ABOVE",
+                "Contents warmer than the threshold will leave through the filtered output");
+            Strings.Add("STRINGS.UI.UISIDESCREENS.TEMPERATUREFILTER.TOOLTIP_BELOW",
+                "Contents cooler than the threshold will leave through the filtered output");
             AddToPlanScreenBeside("LiquidFilter", LiquidTemperatureFilterConfig.ID);
             AddToPlanScreenBeside("GasFilter", GasTemperatureFilterConfig.ID);
         }
